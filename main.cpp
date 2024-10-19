@@ -1,67 +1,63 @@
-#include <GLFW/glfw3.h>
 #include <iostream>
+#include "GLFW/glfw3.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
-// Callback function for error handling
-void errorCallback(int error, const char* description) {
-    std::cerr << "Error: " << description << std::endl;
-}
-
-class Renderer
-{
-    public:
-    
-    void Triangle
-    {
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        glViewport(0, 0, width, height);
-    }
-};
-Renderer renderer;
+// Main function
 int main() {
-    // Set the error callback
-    glfwSetErrorCallback(errorCallback);
-
     // Initialize GLFW
     if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
+        std::cerr << "Failed to initialize GLFW!" << std::endl;
         return -1;
     }
-    renderer.Triangle();
-    // Specify OpenGL version and profile
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // Major version
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // Minor version
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile
 
-    // Create a windowed mode window and its OpenGL context
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Cassie Engine", NULL, NULL);
+    // Set OpenGL version and profile
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);  // Use OpenGL version 3.3 (or adjust to your version)
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use the core OpenGL profile
+
+    // Create a GLFW window
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "My Game Engine", nullptr, nullptr);
     if (!window) {
+        std::cerr << "Failed to create GLFW window!" << std::endl;
         glfwTerminate();
         return -1;
     }
 
-    // Make the window's context current
+    // Make the OpenGL context current
     glfwMakeContextCurrent(window);
 
-    // Set viewport size
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-
-    // Main loop
+    // Main application loop
     while (!glfwWindowShouldClose(window)) {
-        // Render here
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set clear color
-        glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer
+        glfwPollEvents();         // Handle events
+        glClear(GL_COLOR_BUFFER_BIT);  // Clear the screen
 
-        // Swap front and back buffers
+        // Start the ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // ImGui UI logic
+        if (ImGui::Begin("Sample Window")) {
+            ImGui::Text("Hello, world!");
+        }
+        ImGui::End();
+
+        // Render the ImGui UI
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Swap buffers
         glfwSwapBuffers(window);
-        // Poll for and process events
-        glfwPollEvents();
     }
 
-    // Clean up
+    // Proper shutdown of ImGui and GLFW
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwDestroyWindow(window);
     glfwTerminate();
+
     return 0;
 }
